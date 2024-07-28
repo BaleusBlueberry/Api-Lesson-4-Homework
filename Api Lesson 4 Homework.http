@@ -1,0 +1,6 @@
+@Api_Lesson_4_Homework_HostAddress = http://localhost:5219
+
+GET {{Api_Lesson_4_Homework_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
