@@ -1,8 +1,7 @@
+using Api_Lesson_4_Homework.auth;
 using Api_Lesson_4_Homework.Models;
 using Api_Lesson_4_Homework.Repository;
 using Api_Lesson_4_Homework.Servises;
-using AspNetCore.Identity.Mongo;
-using MongoDB.Bson;
 
 namespace Api_Lesson_4_Homework;
 
@@ -12,21 +11,13 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
+        Utils.setupJwt(builder);
+        Utils.setupIdentity(builder);
         // Add services to the container.
-        var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-        builder.Services.AddIdentityMongoDbProvider<AppUser, AppRole, ObjectId>(identity =>
-        {
-            identity.Password.RequiredLength = 9;
-            identity.Password.RequireLowercase = true;
-            identity.Password.RequireUppercase = true;
-            identity.Password.RequireDigit = true;
-            identity.User.RequireUniqueEmail = true;
-            identity.Password.RequireNonAlphanumeric = true;
-            identity.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
-        }, mongo =>
-        {
-            mongo.ConnectionString = connectionString;
-        });
+
+        //DI: use the appsettings.json file to fill the JwtSettings object
+        builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
+        builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 
         builder.Services.AddControllers();
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -46,8 +37,9 @@ public class Program
             app.UseSwaggerUI();
         }
 
-        app.UseHttpsRedirection();
+       /* app.UseHttpsRedirection();*/
 
+        app.UseAuthentication();
         app.UseAuthorization();
 
 

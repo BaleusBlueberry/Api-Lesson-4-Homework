@@ -3,11 +3,13 @@ using Api_Lesson_4_Homework.Mappings;
 using Api_Lesson_4_Homework.Models;
 using Api_Lesson_4_Homework.Repository;
 using Humanizer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api_Lesson_4_Homework.Controllers
 {
     [Route("api/[controller]")]
+    
     [ApiController]
     public class CardController : ControllerBase
     {
@@ -19,6 +21,7 @@ namespace Api_Lesson_4_Homework.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> PostCard([FromBody] CardAddRequest dto)
         {
             var card = dto.ToCard("TheUserId");

@@ -1,4 +1,5 @@
-﻿using Api_Lesson_4_Homework.Mappings;
+﻿using Api_Lesson_4_Homework.auth;
+using Api_Lesson_4_Homework.Mappings;
 using Api_Lesson_4_Homework.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -9,7 +10,8 @@ namespace Api_Lesson_4_Homework.Controllers
     [ApiController]
     public class AuthController(
         UserManager<AppUser> userManager,
-        SignInManager<AppUser> signInManager
+        SignInManager<AppUser> signInManager,
+        IJwtTokenService JwtTokenService
     ) : ControllerBase
     {
         [HttpPost("register")]
@@ -27,15 +29,21 @@ namespace Api_Lesson_4_Homework.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto dto)
         {
-            var result = await signInManager.PasswordSignInAsync(dto.Email, dto.Password, false, false);
+            var user = await userManager.FindByEmailAsync(dto.Email);
 
-            if (result.Succeeded)
+            if (user == null) return Unauthorized("user not found");
+
+           /* var result = await signInManager.PasswordSignInAsync(dto.Email, dto.Password, false, false);*/
+           var isLoggedIn = await userManager.CheckPasswordAsync(user, dto.Password);
+
+            if (isLoggedIn)
             {
-                return Ok(result);
+                var token = await JwtTokenService.CreateToken(user);
+                return Ok(token);
             }
 
             //TODO : Implement JWT Token
-            return Unauthorized(result);
+            return Unauthorized();
         }
     }
 }
